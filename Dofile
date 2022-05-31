@@ -116,7 +116,7 @@ save fallecidos.dta, replace
 // ******************************************************
 // Informacion Distrital
 // ******************************************************
-import excel using "Datos\Distritos 2022.xlsx", firstrow sheet(Distritos) cellrange(A1:HI2096) clear
+import excel using "Datos\Distritos 2022.0.xlsx", firstrow sheet(Distritos) cellrange(A1:AS2096) clear
 drop if Distrito == ""
 
 // Agregar info de contagiados
@@ -228,23 +228,23 @@ forval i=1/3 {
   gen mortalidad_h_ola`i' = 1000*fallecidos_h_ola`i'/poblacion_hombres
 }
 forval i=0/17 {
-  gen mortalidad_agegroup`i' = 1000*fallecidos_agegroup`i'/poblacion_total
+  gen mortalidad_agegroup`i' = 1000*fallecidos_agegroup`i'/agegrp`i'
   forval j=1/3 {
-    gen mortalidad_agegroup`i'_ola`j' = 1000*fallecidos_agegroup`i'_ola`j'/poblacion_total
+    gen mortalidad_agegroup`i'_ola`j' = 1000*fallecidos_agegroup`i'_ola`j'/agegrp`i'
   }
 }
 
 //log Mortalidad
-gen lmortalidad_total = log(mortalidad_total)
-gen lmortalidad_h_total = log(mortalidad_h_total)
+gen lmortalidad_total = ln1p(mortalidad_total)
+gen lmortalidad_h_total = ln1p(mortalidad_h_total)
 forval i=1/3 {
-  gen lmortalidad_ola`i' = log(mortalidad_ola`i')
-  gen lmortalidad_h_ola`i' = log(mortalidad_h_ola`i')
+  gen lmortalidad_ola`i' = ln1p(mortalidad_ola`i')
+  gen lmortalidad_h_ola`i' = ln1p(mortalidad_h_ola`i')
 }
 forval i=0/17 {
-  gen lmortalidad_agegroup`i' = log(mortalidad_agegroup`i')
+  gen lmortalidad_agegroup`i' = ln1p(mortalidad_agegroup`i')
   forval j=1/3 {
-    gen lmortalidad_agegroup`i'_ola`j' = log(mortalidad_agegroup`i'_ola`j')
+    gen lmortalidad_agegroup`i'_ola`j' = ln1p(mortalidad_agegroup`i'_ola`j')
   }
 }
 
@@ -265,18 +265,17 @@ forval i=0/17 {
 
 replace letalidad_total = 100 if letalidad_total >100
 
-// log letalidad 
-
-gen lletalidad_total = log(letalidad_total)
-gen lletalidad_h_total = log(letalidad_h_total)
+// log letalidad
+gen lletalidad_total = ln1p(letalidad_total)
+gen lletalidad_h_total = ln1p(letalidad_h_total)
 forval i=1/3 {
-  gen lletalidad_ola`i' = log(letalidad_ola`i')
-  gen lletalidad_h_ola`i' = log(letalidad_h_ola`i')
+  gen lletalidad_ola`i' = ln1p(letalidad_ola`i')
+  gen lletalidad_h_ola`i' = ln1p(letalidad_h_ola`i')
 }
 forval i=0/17 {
-  gen lletalidad_agegroup`i' = log(letalidad_agegroup`i')
+  gen lletalidad_agegroup`i' = ln1p(letalidad_agegroup`i')
   forval j=1/3 {
-    gen lletalidad_agegroup`i'_ola`j' = log(letalidad_agegroup`i'_ola`j')
+    gen lletalidad_agegroup`i'_ola`j' = ln1p(letalidad_agegroup`i'_ola`j')
   }
 }
 
@@ -295,16 +294,16 @@ forval i=0/17 {
 }
 
 //log casos
-gen lcont_pctg_total = log(contagiados_pctg_total)
-gen lcont_h_pctg_total = log(contagiados_h_pctg_total)
+gen lcont_pctg_total = ln1p(contagiados_pctg_total)
+gen lcont_h_pctg_total = ln1p(contagiados_h_pctg_total)
 forval i=1/3 {
-  gen lcont_pctg_ola`i' = log(contagiados_pctg_ola`i')
-  gen lcont_h_pctg_ola`i' = log(contagiados_h_pctg_ola`i')
+  gen lcont_pctg_ola`i' = ln1p(contagiados_pctg_ola`i')
+  gen lcont_h_pctg_ola`i' = ln1p(contagiados_h_pctg_ola`i')
 }
 forval i=0/17 {
-  gen lcont_pctg_agegroup`i' = log(contagiados_pctg_agegroup`i')
+  gen lcont_pctg_agegroup`i' = ln1p(contagiados_pctg_agegroup`i')
   forval j=1/3 {
-    gen lcont_pctg_agegroup`i'_ola`j' = log(contagiados_pctg_agegroup`i'_ola`j')
+    gen lcont_pctg_agegroup`i'_ola`j' = ln1p(contagiados_pctg_agegroup`i'_ola`j')
   }
 }
 
@@ -361,102 +360,426 @@ outreg2 using "Resultados\analisis_bivariado_mortalidad", word replace ctitle(x1
 
 reg lmortalidad_total hombres_pctg [weight=poblacion_total], robust
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x1) label
+
 reg lmortalidad_total Pobreza_pctg [weight=poblacion_total], robust
-
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total Pobreza_ext_pctg [weight=poblacion_total], robust
-
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total densidad [weight=poblacion_total], robust
-
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total Latitud [weight=poblacion_total], robust
-
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total h2o_s_pctg [weight=poblacion_total], robust
-
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_VP_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
 
+reg lmortalidad_total poblacion_SH_pctg [weight=poblacion_total], robust 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
-reg lmortalidad_total poblacion_SH_pctg [weight=poblacion_total], robust
- 
-outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp0_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp1_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp2_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp3_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp4_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp5_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp6_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp7_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp8_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp9_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp10_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
-reg lmortalidad_total agegrp11_pctg [weight=poblacion_total], robust
- 
+
+reg lmortalidad_total agegrp11_pctg [weight=poblacion_total], robust 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp12_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp13_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp14_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp15_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp16_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total agegrp17_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_DD_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_DF_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_CA_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_PS_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_RA_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_PC_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
 reg lmortalidad_total poblacion_SH_Let_pctg [weight=poblacion_total], robust
- 
 outreg2 using "Resultados\analisis_bivariado_mortalidad", word append ctitle(x2) label
+
+reg lmortalidad_ola1 Altitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word replace ctitle(x1) label
+
+reg lmortalidad_ola1 hombres_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x1) label
+
+reg lmortalidad_ola1 Pobreza_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 Pobreza_ext_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 densidad [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 Latitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 h2o_s_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_VP_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp0_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp1_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp2_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp3_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp4_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp5_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp6_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp7_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp8_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp9_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp10_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp11_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp12_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp13_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp14_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp15_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp16_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 agegrp17_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_DD_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_DF_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_CA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_PS_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_RA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_PC_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola1 poblacion_SH_Let_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola1", word append ctitle(x2) label
+
+reg lmortalidad_ola2 Altitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word replace ctitle(x1) label
+
+reg lmortalidad_ola2 hombres_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x1) label
+
+reg lmortalidad_ola2 Pobreza_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 Pobreza_ext_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 densidad [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 Latitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 h2o_s_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_VP_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp0_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp1_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp2_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp3_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp4_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp5_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp6_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp7_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp8_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp9_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp10_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp11_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp12_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp13_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp14_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp15_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp16_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 agegrp17_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_DD_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_DF_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_CA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_PS_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_RA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_PC_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola2 poblacion_SH_Let_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola2", word append ctitle(x2) label
+
+reg lmortalidad_ola3 Altitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word replace ctitle(x1) label
+
+reg lmortalidad_ola3 hombres_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x1) label
+
+reg lmortalidad_ola3 Pobreza_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 Pobreza_ext_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 densidad [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 Latitud [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 h2o_s_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_VP_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp0_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp1_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp2_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp3_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp4_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp5_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp6_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp7_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp8_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp9_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp10_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp11_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp12_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp13_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp14_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp15_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp16_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 agegrp17_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_DD_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_DF_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_CA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_PS_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_RA_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_PC_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+reg lmortalidad_ola3 poblacion_SH_Let_pctg [weight=poblacion_total], robust
+outreg2 using "Resultados\analisis_bivariado_mortalidad_ola3", word append ctitle(x2) label
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 graph twoway (lfitci lmortalidad_total Altitud) (scatter lmortalidad_total Altitud)
 graph twoway (lfitci lmortalidad_total poblacion_SH_DD_pctg) (scatter lmortalidad_total poblacion_SH_DD_pctg)
 graph twoway (lfitci lmortalidad_total poblacion_SH_DF_pctg) (scatter lmortalidad_total poblacion_SH_DF_pctg)
